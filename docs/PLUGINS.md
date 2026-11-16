@@ -34,7 +34,8 @@
 
 | 插件 | 作用 |
 |---|---|
-| `luci-app-homeproxy` | 基于 sing-box 的透明代理客户端，**唯一代理入口**（来自 VIKINGYFY/packages 修改版） |
+| `luci-app-homeproxy` | 基于 sing-box 的透明代理客户端，主科学上网入口（来自 VIKINGYFY/packages 修改版） |
+| `luci-app-passwall` | 老牌代理客户端；7 个可选子组件（haproxy、shadowsocks-rust、simple-obfs、trojan-plus、v2ray-geoview、v2ray-plugin 等）全部显式关闭，精简体积 |
 | `luci-app-natmapt` | 内网穿透/端口映射，解决无公网 IP 下的全锥形 NAT（源码取自 zhoufla 的 muink 分支） |
 | `natmapt-notify-script-telegram` | natmapt 端口更新后的 Telegram 电报提醒脚本，装到 `/etc/natmap/notify/Telegram`，在 LuCI「natmap → Notify Scripts」中选择使用 |
 | `luci-app-ddns-go` | 动态域名解析，支持阿里、腾讯、Cloudflare 等服务商（sirpdboy 封装 ddns-go） |
@@ -84,7 +85,7 @@
 
 | 项 | 内容 |
 |---|---|
-| 代理 | `luci-app-homeproxy`（同 QCA，sing-box 内核） |
+| 代理 | `luci-app-homeproxy`（同 QCA，sing-box 内核）、`luci-app-passwall`（同 QCA，INCLUDE 子组件全关） |
 | 插件 | `luci-app-natmapt` + Telegram 通知、`luci-app-ddns-go`、`luci-app-autoreboot`、`luci-app-mini-diskmanager`、`luci-app-msd_lite`、`luci-app-samba4`、`luci-app-uhttpd`、`luci-app-zerotier`、`luci-app-iptv`、`luci-app-cpufreq`、`luci-app-pon`（pon_userspace feed）、`luci-proto-wireguard` |
 | 组件 | `autocore`、`automount`、`curl`、`wireguard-tools`、`stuntman-client`（natmapt STUN）、`kmod-nf-tproxy`/`kmod-nft-tproxy`（透明代理）、`kmod-nf-conntrack-bridge`（AN7583 已无 profile 默认提供） |
 | 关闭 | `luci-app-vlmcsd`、`luci-app-wol`、`luci-app-attendedsysupgrade`（与 QCA 相同） |
@@ -138,7 +139,7 @@
 | 分类 | 插件 |
 |---|---|
 | 主题 | argon、fluent、footstrap、kucat、kucat-config、shadcn、vantage（上游新默认主题，本项目沿用 aurora，故仅克隆备用） |
-| 代理 | momo、nikki、openclash |
+| 代理 | momo、nikki、openclash、passwall2 |
 | 存储/下载 | diskman（sbwml 版）、openlist2、qbittorrent、quickfile、mosdns |
 | sirpdboy 系列 | netspeedtest、netwizard、timecontrol（partexp 仅 TEST 配置用） |
 | LianXia233 系列 | airpi3000m-fancontrol、chfs、fm350、h5000m-netmode、mt5700、mt5700m、netmonitor、qmodem-generic |
