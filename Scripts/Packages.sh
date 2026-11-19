@@ -68,6 +68,59 @@ UPDATE_PACKAGE "easytier" "EasyTier/luci-app-easytier" "main"
 UPDATE_PACKAGE "qmodem" "FUjr/QModem" "main"
 UPDATE_PACKAGE "viking" "VIKINGYFY/packages" "main" "" "axonhub gecoosac miniupnpd sing-box luci-app-homeproxy luci-app-timewol luci-app-upnp luci-app-wolplus luci-app-wolultra"
 
+# homeproxy：让 sing-box 用 dnsmasq 的 config domain 应答内网域名
+# TUN auto_redirect 会把 LAN 的 53 端口劫持到 sing-box，未注入 hosts 时内网域名解析不到
+HOMEPROXY_GEN="./package/packages/luci-app-homeproxy/root/etc/homeproxy/scripts/generate_client.uc"
+if [ -f "$HOMEPROXY_GEN" ]; then
+	if grep -q "tag: 'lan-hosts'" "$HOMEPROXY_GEN"; then
+		echo "homeproxy LAN hosts: already patched"
+	elif ! command -v python3 >/dev/null 2>&1; then
+		echo "homeproxy LAN hosts: python3 missing, skipped!"
+	else
+		python3 - "$HOMEPROXY_GEN" <<'PYEOF'
+import sys
+
+path = sys.argv[1]
+with open(path, encoding='utf-8') as f:
+	src = f.read()
+
+anchor = "strategy: dns_default_strategy\n};\n"
+if src.count(anchor) != 1 or "tag: 'lan-hosts'" in src:
+	print("homeproxy LAN hosts: anchor not found, skipped!")
+	sys.exit(0)
+
+block = anchor + """
+/* Local LAN host records: reuse dnsmasq domain entries as sing-box hosts answers */
+{
+	let lan_hosts = {};
+	let dhcp_uci = cursor();
+	if (dhcp_uci.load('dhcp'))
+		dhcp_uci.foreach('dhcp', 'domain', (s) => {
+			if (s.name && s.ip)
+				lan_hosts[s.name] = s.ip;
+		});
+	if (length(keys(lan_hosts)) > 0) {
+		push(config.dns.servers, {
+			type: 'hosts',
+			tag: 'lan-hosts',
+			predefined: lan_hosts
+		});
+		config.dns.rules = [{
+			domain: keys(lan_hosts),
+			action: 'route',
+			server: 'lan-hosts'
+		}];
+	}
+}
+"""
+
+with open(path, 'w', encoding='utf-8') as f:
+	f.write(src.replace(anchor, block))
+print("homeproxy LAN hosts: applied")
+PYEOF
+	fi
+fi
+
 UPDATE_PACKAGE "diskman" "sbwml/luci-app-diskman" "main"
 UPDATE_PACKAGE "mosdns" "sbwml/luci-app-mosdns" "v5" "" "v2dat"
 UPDATE_PACKAGE "openlist2" "sbwml/luci-app-openlist2" "main"
